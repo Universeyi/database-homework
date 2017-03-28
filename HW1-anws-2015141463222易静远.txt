@@ -1,0 +1,44 @@
+--1
+select title from course where credits=3;
+
+--2
+select distinct student.id
+from (student join takes using(id)) join (instructor join teaches using(id)) using(course_id,sec_id,semester,year)
+where instructor.name='Einstein';
+
+--3
+select max(salary)
+from instructor;
+
+--4
+select id,instructor
+from instructor
+where instructor.salary=(select max(salary) from instructor);
+
+
+--5
+select course_id, sec_id, count(ID)
+from section natural join takes
+where (year, semester) = (2009,'Fall')
+group by course_id, sec_id;
+
+--6
+select max(enrollment)
+from (
+    select count(ID) as enrollment
+    from section natural join takes
+    where semester='Fall' and year='2009'
+    group by course_id, sec_id
+) as a;
+
+--7
+with sec_er as (
+select course_id, sec_id, count(ID) as enrollment
+from section natural join takes
+where semester = 'Fall'
+and year = 2009
+group by course_id, sec_id
+)
+select course_id,sec_id
+from sec_er
+where enrollment=(select max(enrollment) from sec_er);

@@ -1,0 +1,48 @@
+--1
+SELECT ssn, name, salary from employee where employee.ssn in (SELECT mgr_ssn from department);
+
+--2
+
+SELECT DISTINCT ssn , name
+FROM employee
+WHERE ssn in (select ssn from hourlog where hours>100) ;
+
+--3
+with pro as (SELECT ssn,count(pno) as pno_num from hourlog GROUP BY ssn)
+SELECT ssn , name
+FROM employee
+WHERE employee.ssn in (SELECT ssn from pro WHERE pno_num>=2);
+
+--3相关子查询
+SELECT ssn , name
+FROM employee e
+WHERE 2<= (SELECT count(*) FROM hourlog h where h.ssn = e.ssn)
+
+--4
+with pro as (SELECT ssn,count(pno) as pno_num from hourlog GROUP BY ssn)
+SELECT ssn , name
+FROM employee
+WHERE  employee.ssn NOT IN (SELECT ssn from pro);
+
+--4 减法版本
+(select ssn.name
+from employee)
+except
+(except e.ssn,name
+from employee e, hourlog h
+where e.ssn=h.ssn)
+
+
+--5
+WITH Singh_work as (SELECT pno from employee NATURAL JOIN hourlog WHERE name='Singh')
+SELECT DISTINCT ssn, name
+FROM employee NATURAL JOIN hourlog
+WHERE pno in (SELECT pno FROM Singh_work);
+
+--使用集合包含的思路
+
+--6
+
+SELECT DISTINCT em.ssn,name
+FROM employee as em,department as dp,project as pro,hourlog as ho
+WHERE em.ssn = dp.mgr_ssn  and dp.dno = pro.dno and pro.pno=ho.pno and ho.ssn=em.ssn
